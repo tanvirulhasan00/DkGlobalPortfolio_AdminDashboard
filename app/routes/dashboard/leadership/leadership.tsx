@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { DataTable } from "~/components/custom-data-table/data-table";
 import { DataTableSkeleton } from "~/components/route-components/datatableskeleton";
 import { Separator } from "~/components/ui/separator";

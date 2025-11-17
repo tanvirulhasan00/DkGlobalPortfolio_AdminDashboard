@@ -10,7 +10,9 @@ const Footer = () => {
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
 
-        <p className="text-sm">Copyright &copy; 2025 Logic Ninja Inc.</p>
+        <p className="text-sm">
+          Copyright &copy; 2025 Dk Global Fashion Wear Ltd.
+        </p>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ const DashboardHome = () => {
     <div className="w-full h-screen">
       <h1 className="text-lg font-bold">Website preview</h1>
       <iframe
-        src="https://dkglobalfashion.com/"
+        src="https://portfolio.cookiesoftwareltd.com"
         className="w-full h-full border-none"
         title="DK Global Fashion"
       />
