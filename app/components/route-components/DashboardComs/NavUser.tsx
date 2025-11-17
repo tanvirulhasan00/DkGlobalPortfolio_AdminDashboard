@@ -1,11 +1,4 @@
-import {
-  BellIcon,
-  CreditCardIcon,
-  LogOutIcon,
-  MoreVerticalIcon,
-  UserCircleIcon,
-} from "lucide-react";
-import { useEffect } from "react";
+import { BellIcon, LogOutIcon, UserCircleIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -23,11 +16,17 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar";
-
-import { useNavigate } from "react-router";
+import { useAppDispatch } from "~/redux/hooks/hook";
+import { logout } from "~/redux/features/authSlice";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    window.location.reload();
+  };
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -82,7 +81,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

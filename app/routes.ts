@@ -7,7 +7,7 @@ import {
 
 export default [
   index("routes/root_route.tsx"),
-  route("login", "routes/auth/login.tsx"),
+  route("auth/login", "routes/auth/login.tsx"),
   route("dashboard", "routes/dashboard/dashboard.tsx", [
     index("routes/dashboard/dashboard-home.tsx"),
     ...prefix("company", [
