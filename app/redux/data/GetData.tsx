@@ -24,7 +24,6 @@ export const apiRequest = async (
       },
       data: method !== "get" ? formData || params : undefined, // ✅ only for POST/DELETE
     });
-    // console.log("API Response:", data);
     return data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {

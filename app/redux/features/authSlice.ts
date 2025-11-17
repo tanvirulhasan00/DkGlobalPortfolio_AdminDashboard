@@ -3,6 +3,7 @@ import {
   createSlice,
   type PayloadAction,
 } from "@reduxjs/toolkit";
+import { baseUrl } from "~/components/route-components/data";
 import { apiRequest } from "~/redux/data/GetData";
 import { Login } from "~/redux/data/LoginData";
 
@@ -17,6 +18,18 @@ interface response {
   token: string;
   tokenExpire: string;
 }
+interface User {
+  id: string;
+  userName: string;
+  email: string;
+  phoneNumber: string;
+}
+interface UserData {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  result: User;
+}
 interface Data {
   statusCode: number;
   success: boolean;
@@ -26,11 +39,13 @@ interface Data {
 interface StateType {
   loading: boolean;
   data: Data | null;
+  userData: UserData | null;
   error: string | null;
 }
 const initialState: StateType = {
   loading: false,
   data: null,
+  userData: null,
   error: null,
 };
 
@@ -51,6 +66,30 @@ export const LoginRequest = createAsyncThunk(
       const errorMessage =
         error?.response?.data?.message || error?.message || "Login failed";
       return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const GetUser = createAsyncThunk(
+  "user/getUser",
+  async (
+    { UserId, token }: { UserId: string | null; token: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await apiRequest(
+        "get",
+        `${baseUrl}/api/auth/user/get`,
+        token,
+        "application/json",
+        { UserId }
+      );
+      return res;
+    } catch (error: any) {
+      console.log(error);
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to get user data"
+      );
     }
   }
 );
@@ -86,6 +125,18 @@ const authSlice = createSlice({
         state.loading = false;
       })
       .addCase(LoginRequest.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error as string;
+      })
+      .addCase(GetUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(GetUser.fulfilled, (state, action: PayloadAction<UserData>) => {
+        state.userData = action.payload;
+        state.loading = false;
+      })
+      .addCase(GetUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error as string;
       });
