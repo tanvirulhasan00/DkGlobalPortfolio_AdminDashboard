@@ -1,5 +1,9 @@
 import { type ColumnDef } from "@tanstack/react-table";
+import { useState } from "react";
+import { Link } from "react-router";
 import { Checkbox } from "~/components/ui/checkbox";
+import LeaderShipUpdate from "~/routes/dashboard/leadership/leadership-update";
+import { Button } from "../ui/button";
 
 export type Leadership = {
   id: number;
@@ -91,12 +95,16 @@ export const columns: ColumnDef<Leadership>[] = [
     header: "Actions",
     cell: ({ row }) => {
       const data = row.original;
+      const [open, setOpen] = useState(false);
 
       return (
         <div className="flex gap-4">
-          {/* <CategoryUpdate category={cateogry} /> */}
-          {/* <CategoryStatus category={cateogry} /> */}
-          <h1>Edit</h1>
+          <Button onClick={() => setOpen(true)}>Edit</Button>
+          <LeaderShipUpdate
+            data={data}
+            open={open}
+            onClose={() => setOpen(false)}
+          />
         </div>
       );
     },
