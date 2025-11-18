@@ -5,7 +5,7 @@ type Params = {
 };
 
 export const apiRequest = async (
-  method: "get" | "post" | "delete",
+  method: "get" | "post" | "delete" | "put",
   url: string,
   token: string | null,
   contentType: string = "application/json",

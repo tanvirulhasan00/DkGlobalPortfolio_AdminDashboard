@@ -44,7 +44,10 @@ export default [
         "routes/dashboard/blogs/blog-post-tag/blog-post-tag.tsx"
       ),
     ]),
-    route("leader-ships", "routes/dashboard/leadership/leadership.tsx"),
+    ...prefix("leader-ships", [
+      route("", "routes/dashboard/leadership/leadership.tsx"),
+      route("update", "routes/dashboard/leadership/leadership-update.tsx"),
+    ]),
     route("messages", "routes/dashboard/messages/messages.tsx"),
     route("news-letters", "routes/dashboard/newsletters/newsletters.tsx"),
     route("partners", "routes/dashboard/partners/partners.tsx"),

@@ -95,16 +95,12 @@ export const columns: ColumnDef<Leadership>[] = [
     header: "Actions",
     cell: ({ row }) => {
       const data = row.original;
-      const [open, setOpen] = useState(false);
 
       return (
         <div className="flex gap-4">
-          <Button onClick={() => setOpen(true)}>Edit</Button>
-          <LeaderShipUpdate
-            data={data}
-            open={open}
-            onClose={() => setOpen(false)}
-          />
+          <Link to={`update`} state={data}>
+            Edit
+          </Link>
         </div>
       );
     },

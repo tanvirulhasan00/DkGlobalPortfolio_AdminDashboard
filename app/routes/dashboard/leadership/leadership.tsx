@@ -14,15 +14,15 @@ const Leadership = () => {
   const { loading, data, error, refresh } = useAppSelector(
     (state) => state.leader
   );
-
   useEffect(() => {
     fetchProducts();
     setIsAttempted(false);
-  }, [refresh]);
+  }, [dispatch, refresh]);
 
   // toaster
   useEffect(() => {
     if (isAttempted) return;
+
     const ShowToast = data?.success ? toast.success : toast.error;
     ShowToast(data?.statusCode ?? data?.code, {
       description: data?.message,

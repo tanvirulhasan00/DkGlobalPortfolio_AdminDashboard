@@ -1,302 +1,258 @@
+import { IconUpload, IconUserEdit } from "@tabler/icons-react";
+import { useRef, useState } from "react";
 import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  Transition,
-} from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
+  useLocation,
+  useNavigate,
+  useNavigation,
+  useParams,
+} from "react-router";
+import { updateLeadership } from "~/redux/features/leadershipSlice";
 import { useAppDispatch, useAppSelector } from "~/redux/hooks/hook";
-import { Spinner } from "~/components/ui/spinner";
-import { ArrowUpRightIcon, X } from "lucide-react";
-import { IconFolderCode, IconUpload } from "@tabler/icons-react";
-import type { Leadership } from "~/components/columns/leadership-columns";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
-} from "~/components/ui/field";
-import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Input } from "~/components/ui/input";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "~/components/ui/empty";
 
-type FormComponentProps = {
-  className?: string;
-  onSubmit: (formData: FormData) => void;
-  data: Leadership;
-  onClose: () => void;
-};
-
-const LeaderShipUpdate = ({
-  data,
-  open,
-  onClose,
-}: {
-  data: Leadership;
-  open: boolean;
-  onClose: () => void;
-}) => {
+const LeadershipPage = () => {
+  const location = useLocation();
+  const data = location.state || {}; // <-- received state
   const dispatch = useAppDispatch();
-
-  const handleUpdate = async (formData: FormData) => {
-    // if (token) {
-    //   dispatch(
-    //     createItemUser({
-    //       token,
-    //       formPayload: formData,
-    //     })
-    //   );
-    // }
-  };
-
-  return (
-    <Transition show={open} as={Fragment}>
-      <Dialog onClose={onClose} className="relative z-50">
-        {/* Backdrop */}
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-150"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <DialogBackdrop className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 flex items-center justify-center sm:items-center sm:justify-center p-4">
-          {/* Mobile bottom drawer */}
-          <Transition.Child
-            as={Fragment}
-            enter="transform transition ease-in-out duration-300"
-            enterFrom="translate-y-full"
-            enterTo="translate-y-0"
-            leave="transform transition ease-in-out duration-300"
-            leaveFrom="translate-y-0"
-            leaveTo="translate-y-full"
-          >
-            <DialogPanel className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4 shadow-lg sm:hidden max-h-[90vh] overflow-y-auto">
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <FormComponent
-                data={data}
-                onSubmit={handleUpdate}
-                onClose={onClose}
-              />
-            </DialogPanel>
-          </Transition.Child>
-
-          {/* Desktop centered modal */}
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-200"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-150"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <DialogPanel className="hidden sm:flex relative flex-col sm:flex-row bg-white rounded-lg p-6 shadow-xl w-full max-w-3xl sm:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto">
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <div className="flex-shrink-0 w-full">
-                <FormComponent
-                  data={data}
-                  onSubmit={handleUpdate}
-                  onClose={onClose}
-                />
-              </div>
-            </DialogPanel>
-          </Transition.Child>
-        </div>
-      </Dialog>
-    </Transition>
-  );
-};
-
-export default LeaderShipUpdate;
-
-const FormComponent = ({
-  className,
-  onSubmit,
-  data,
-  onClose,
-}: FormComponentProps) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState(data?.imageUrl || "");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { loading, data: leaderData } = useAppSelector((state) => state.leader);
+  const navigate = useNavigate();
+  console.log(leaderData);
   const [formData, setFormData] = useState({
-    id: data?.id,
-    name: data?.name,
-    designation: data?.designation,
-    email: data?.email,
-    phoneNumber: data?.phoneNumber,
-    imageUrl: data?.imageUrl,
-    isActive: data?.isActive,
+    id: data?.id || "",
+    name: data?.name || "",
+    designation: data?.designation || "",
+    email: data?.email || "",
+    phoneNumber: data?.phoneNumber || "",
+    isActive: data?.isActive ?? true,
   });
-  const fileInputRef = useRef(null);
-  const [preview, setPreview] = useState(null);
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-  };
 
-  const openFilePicker = () => {
-    fileInputRef.current?.click();
-  };
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const formPayload = new FormData();
+
+    // Append all form data including ID
     Object.entries(formData).forEach(([k, v]) =>
       formPayload.append(k, String(v ?? ""))
     );
 
-    onSubmit(formPayload);
-  };
-  return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <FieldGroup>
-          <FieldSet>
-            <FieldLegend>Update Leader Information</FieldLegend>
-            <FieldGroup>
-              <Field className="w-[20rem]">
-                <FieldLabel htmlFor="image">Image</FieldLabel>
-                <img
-                  alt=""
-                  src={formData?.imageUrl}
-                  className="w-full h-[10rem] rounded-2xl"
-                />
-              </Field>
-              <FieldSeparator />
-              <Field>
-                <FieldLabel htmlFor="name">Name</FieldLabel>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData?.name}
-                  onChange={handleChange}
-                  placeholder="Josef"
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="designation">Designation</FieldLabel>
-                <Input
-                  id="designation"
-                  name="designation"
-                  value={formData?.designation}
-                  onChange={handleChange}
-                  placeholder="CEO"
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  name="email"
-                  value={formData?.email}
-                  onChange={handleChange}
-                  placeholder="CEO"
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="phoneNumber">Phone Number</FieldLabel>
-                <Input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData?.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="+880XXXXXXXXXX"
-                  required
-                />
-              </Field>
-              <FieldSeparator />
-              <div className="w-full max-w-md mx-auto p-4">
-                {!preview ? (
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <IconFolderCode />
-                      </EmptyMedia>
-                      <EmptyTitle>No Image Yet</EmptyTitle>
-                      <EmptyDescription>
-                        Select new image to update.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                    <EmptyContent>
-                      <div className="flex gap-2 justify-center">
-                        <Button onClick={openFilePicker}>
-                          <IconUpload className="mr-2 h-4 w-4" /> Upload Image
-                        </Button>
-                      </div>
+    // Append file if selected
+    if (selectedFile) {
+      formPayload.append("imageUrl", selectedFile);
+    }
 
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                    </EmptyContent>
-                  </Empty>
-                ) : (
-                  <div className="space-y-4 text-center">
+    // Also append the original image URL if no new file is selected
+    if (!selectedFile && data.imageUrl) {
+      formPayload.append("imageUrl", data.imageUrl);
+    }
+    // Handle form submission
+    dispatch(updateLeadership({ token: "", formPayload }));
+    navigate(-1);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCancel = () => {
+    // Navigate back or reset
+    navigate(-1);
+  };
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className={`bg-white rounded-2xl shadow-sm border border-gray-200`}>
+        {/* Header */}
+        <div className="flex items-center space-x-3 p-6 border-b border-gray-100">
+          <div className="p-2 bg-blue-50 rounded-lg">
+            <IconUserEdit className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Update Leader
+            </h2>
+            <p className="text-sm text-gray-500">
+              Modify the leadership information
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="p-6 space-y-6">
+            {/* Image Upload Section */}
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50">
+                  {preview ? (
                     <img
                       src={preview}
-                      alt="Preview"
-                      className="rounded-xl border shadow w-full object-cover max-h-64"
+                      alt="Profile"
+                      className="w-full h-full object-cover"
                     />
-                    <Button onClick={openFilePicker}>
-                      <IconUpload className="mr-2 h-4 w-4" /> Change Image
-                    </Button>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <IconUserEdit className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
 
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={handleFileButtonClick}
+                  className="absolute -bottom-2 -right-2 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+                >
+                  <IconUpload className="w-4 h-4" />
+                </button>
               </div>
-            </FieldGroup>
-          </FieldSet>
 
-          <Field orientation="horizontal">
-            <Button type="submit">Submit</Button>
-            <Button variant="outline" type="button" onClick={onClose}>
+              <input
+                type="file"
+                name="imageUrl"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+
+              <p className="text-sm text-gray-500 text-center">
+                Click the camera icon to update photo
+              </p>
+            </div>
+
+            {/* Form Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Full Name *
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter full name"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="designation"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Designation *
+                </label>
+                <input
+                  id="designation"
+                  name="designation"
+                  type="text"
+                  required
+                  value={formData.designation}
+                  onChange={handleChange}
+                  placeholder="e.g., CEO, Director"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Email Address *
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="email@company.com"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phoneNumber"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Phone Number *
+                </label>
+                <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  required
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="+880XXXXXXXXXX"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Active Status */}
+            <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+              <input
+                id="isActive"
+                name="isActive"
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={handleChange}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label
+                htmlFor="isActive"
+                className="text-sm font-medium text-gray-700"
+              >
+                Active team member
+              </label>
+            </div>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex justify-end space-x-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
-            </Button>
-          </Field>
-        </FieldGroup>
-      </form>
+            </button>
+
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              Update Leader
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
+
+export default LeadershipPage;

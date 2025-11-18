@@ -83,7 +83,6 @@ export const createLeadership = createAsyncThunk(
     }
   }
 );
-
 export const updateLeadership = createAsyncThunk(
   "leadership/updateLeadership",
   async (
@@ -92,10 +91,10 @@ export const updateLeadership = createAsyncThunk(
   ) => {
     try {
       const res = await apiRequest(
-        "post",
+        "put",
         `${baseUrl}/api/leadership/update`,
         token,
-        "application/json",
+        "multipart/form-data",
         {},
         formPayload
       );
