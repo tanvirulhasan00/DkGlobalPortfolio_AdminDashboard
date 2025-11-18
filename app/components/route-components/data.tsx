@@ -10,9 +10,6 @@ import {
   BookOpen,
 } from "lucide-react";
 
-// export const baseUrl = "https://inventory.cookiesoftwareltd.com:4200";
-// export const baseUrl = "http://118.179.121.96:4200";
-// export const baseUrl = "http://192.168.2.215:801";
 // export const baseUrl = "https://localhost:7274";
 export const baseUrl = "https://portfolio.api.cookiesoftwareltd.com:4201";
 
