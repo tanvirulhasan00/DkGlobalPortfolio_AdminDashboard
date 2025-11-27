@@ -70,7 +70,7 @@ export const createLeadership = createAsyncThunk(
         "post",
         `${baseUrl}/api/leadership/create`,
         token,
-        "application/json",
+        "multipart/form-data",
         {},
         formPayload
       );

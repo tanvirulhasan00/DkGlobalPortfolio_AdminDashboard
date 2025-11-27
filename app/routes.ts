@@ -46,12 +46,14 @@ export default [
     ]),
     ...prefix("leader-ships", [
       route("", "routes/dashboard/leadership/leadership.tsx"),
+      route("add", "routes/dashboard/leadership/leadership-create.tsx"),
       route("update", "routes/dashboard/leadership/leadership-update.tsx"),
     ]),
     route("messages", "routes/dashboard/messages/messages.tsx"),
     route("news-letters", "routes/dashboard/newsletters/newsletters.tsx"),
     ...prefix("partners", [
       route("", "routes/dashboard/partners/partners.tsx"),
+      route("add", "routes/dashboard/partners/partner-create.tsx"),
       route("update", "routes/dashboard/partners/partner-update.tsx"),
     ]),
   ]),

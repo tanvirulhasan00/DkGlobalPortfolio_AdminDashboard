@@ -45,7 +45,7 @@ const Leadership = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl ">Leader List</h1>
         <Button>
-          <Link to={"#"} className="flex gap-2 items-center">
+          <Link to={"add"} className="flex gap-2 items-center">
             <PlusCircle />
             Add
           </Link>

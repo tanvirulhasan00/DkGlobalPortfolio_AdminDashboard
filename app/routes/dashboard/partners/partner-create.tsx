@@ -1,31 +1,41 @@
 import { IconUpload, IconUserEdit } from "@tabler/icons-react";
-import { useRef, useState } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useNavigation,
-  useParams,
-} from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
 import LoadingSpinner from "~/components/route-components/Loading/loading-spinner";
-import { updateLeadership } from "~/redux/features/leadershipSlice";
-import { updatePartner } from "~/redux/features/partnerSlice";
+import { createPartner } from "~/redux/features/partnerSlice";
 import { useAppDispatch, useAppSelector } from "~/redux/hooks/hook";
 
-const PartnerPage = () => {
+const PartnerCreatePage = () => {
   const location = useLocation();
   const data = location.state || {}; // <-- received state
   const dispatch = useAppDispatch();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState(data?.imageUrl || "");
+  const [isAttempted, setIsAttempted] = useState<boolean>(true);
+  const [preview, setPreview] = useState("/preview.avif");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { loading } = useAppSelector((state) => state.partner);
+  const { loading, data: partnerData } = useAppSelector(
+    (state) => state.partner
+  );
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    id: data?.id || "",
-    title: data?.title || "",
-    link: data?.link || "",
-    isActive: data?.isActive ?? true,
+    title: "",
+    link: "",
+    isActive: true,
   });
+
+  useEffect(() => {
+    if (isAttempted) return;
+    const ShowToast = partnerData?.success ? toast.success : toast.error;
+    ShowToast(partnerData?.statusCode ?? partnerData?.code, {
+      description: partnerData?.message,
+      position: "top-right",
+      richColors: true,
+    });
+    if (partnerData?.success) {
+      navigate(-1);
+    }
+  }, [partnerData]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,8 +57,8 @@ const PartnerPage = () => {
       formPayload.append("imageUrl", data.imageUrl);
     }
     // Handle form submission
-    dispatch(updatePartner({ token: "", formPayload }));
-    navigate(-1);
+    dispatch(createPartner({ token: "", formPayload }));
+    setIsAttempted(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,12 +92,8 @@ const PartnerPage = () => {
             <IconUserEdit className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Update Partner
-            </h2>
-            <p className="text-sm text-gray-500">
-              Modify the partner information
-            </p>
+            <h2 className="text-xl font-semibold text-gray-900">Add Partner</h2>
+            <p className="text-sm text-gray-500">Add the partner information</p>
           </div>
         </div>
 
@@ -159,7 +165,7 @@ const PartnerPage = () => {
                   htmlFor="link"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Web Link *
+                  link *
                 </label>
                 <input
                   id="link"
@@ -188,7 +194,7 @@ const PartnerPage = () => {
                 htmlFor="isActive"
                 className="text-sm font-medium text-gray-700"
               >
-                Active partner
+                Active team member
               </label>
             </div>
           </div>
@@ -207,7 +213,7 @@ const PartnerPage = () => {
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
             >
-              {loading ? <LoadingSpinner /> : "Update Partner"}
+              {loading ? <LoadingSpinner /> : "Add Partner"}
             </button>
           </div>
         </form>
@@ -216,4 +222,4 @@ const PartnerPage = () => {
   );
 };
 
-export default PartnerPage;
+export default PartnerCreatePage;
