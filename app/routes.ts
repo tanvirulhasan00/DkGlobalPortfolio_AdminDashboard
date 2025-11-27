@@ -50,6 +50,9 @@ export default [
     ]),
     route("messages", "routes/dashboard/messages/messages.tsx"),
     route("news-letters", "routes/dashboard/newsletters/newsletters.tsx"),
-    route("partners", "routes/dashboard/partners/partners.tsx"),
+    ...prefix("partners", [
+      route("", "routes/dashboard/partners/partners.tsx"),
+      route("update", "routes/dashboard/partners/partner-update.tsx"),
+    ]),
   ]),
 ] satisfies RouteConfig;

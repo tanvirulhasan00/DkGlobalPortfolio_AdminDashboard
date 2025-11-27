@@ -30,7 +30,7 @@ export const links: Route.LinksFunction = () => [
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "DK Global Portfolio | Dashboard" },
+    { title: "Dashboard | DK Global Portfolio" },
     { name: "description", content: "Welcome to Dk Global Fashion Wear Ltd." },
   ];
 }

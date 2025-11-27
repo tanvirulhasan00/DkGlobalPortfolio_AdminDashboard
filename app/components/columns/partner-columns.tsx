@@ -1,21 +1,10 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
 import { Link } from "react-router";
 import { Checkbox } from "~/components/ui/checkbox";
-import LeaderShipUpdate from "~/routes/dashboard/leadership/leadership-update";
 import { Button } from "../ui/button";
+import type { Partner } from "~/redux/features/partnerSlice";
 
-export type Leadership = {
-  id: number;
-  name: string;
-  designation: string;
-  email: string;
-  phoneNumber: string;
-  imageUrl: string;
-  isActive: string;
-};
-
-export const columns: ColumnDef<Leadership>[] = [
+export const columns: ColumnDef<Partner>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -44,31 +33,18 @@ export const columns: ColumnDef<Leadership>[] = [
     cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
-  },
-  {
-    accessorKey: "designation",
-    header: "Designation",
+    accessorKey: "title",
+    header: "Title",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("designation")}</div>
+      <div className="capitalize">{row.getValue("title")}</div>
     ),
   },
   {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("email")}</div>
-    ),
+    accessorKey: "link",
+    header: "Web Link",
+    cell: ({ row }) => <div className="capitalize">{row.getValue("link")}</div>,
   },
-  {
-    accessorKey: "phoneNumber",
-    header: "Phone Number",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("phoneNumber")}</div>
-    ),
-  },
+
   {
     accessorKey: "imageUrl",
     header: "Image",

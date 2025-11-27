@@ -6,6 +6,9 @@ import { columns } from "~/components/columns/leadership-columns";
 import { useAppDispatch, useAppSelector } from "~/redux/hooks/hook";
 import { toast } from "sonner";
 import { getAllLeadership } from "~/redux/features/leadershipSlice";
+import { Button } from "~/components/ui/button";
+import { Link } from "react-router";
+import { PlusCircle } from "lucide-react";
 
 const Leadership = () => {
   const token = "";
@@ -41,7 +44,12 @@ const Leadership = () => {
     <div className="w-full text-black dark:text-white">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl ">Leader List</h1>
-        <h1>Add</h1>
+        <Button>
+          <Link to={"#"} className="flex gap-2 items-center">
+            <PlusCircle />
+            Add
+          </Link>
+        </Button>
       </div>
       <Separator className="mt-4" />
       <DataTable
