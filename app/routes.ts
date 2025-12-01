@@ -25,6 +25,7 @@ export default [
     ...prefix("reports", [
       route("", "routes/dashboard/reports/reports.tsx"),
       route("categories", "routes/dashboard/reports/categories.tsx"),
+      route("update", "routes/dashboard/reports/report-update.tsx"),
     ]),
     ...prefix("products", [
       route("", "routes/dashboard/products/products/product.tsx"),

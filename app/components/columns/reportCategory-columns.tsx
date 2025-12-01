@@ -72,9 +72,11 @@ export const columns: ColumnDef<ReportCategory>[] = [
 
       return (
         <div className="flex gap-4">
-          <Link to={`update`} state={data}>
-            <Button>Edit</Button>
-          </Link>
+          <Button disabled>
+            <Link to={`update`} state={data}>
+              Edit
+            </Link>
+          </Button>
         </div>
       );
     },

@@ -110,7 +110,7 @@ export const updateReport = createAsyncThunk(
         "put",
         `${baseUrl}/api/reports/update`,
         token,
-        "application/json",
+        "multipart/form-data",
         {},
         formPayload
       );

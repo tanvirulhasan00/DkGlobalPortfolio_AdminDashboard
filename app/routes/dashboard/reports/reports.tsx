@@ -25,7 +25,7 @@ const Reports = () => {
     <div className="w-full text-black dark:text-white">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl ">Report List</h1>
-        <Button>
+        <Button disabled>
           <Link to={"add"} className="flex gap-2 items-center">
             <PlusCircle />
             Add

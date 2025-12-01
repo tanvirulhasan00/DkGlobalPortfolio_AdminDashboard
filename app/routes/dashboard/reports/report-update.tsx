@@ -1,31 +1,41 @@
-import { IconUpload, IconUserEdit } from "@tabler/icons-react";
-import { useRef, useState } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useNavigation,
-  useParams,
-} from "react-router";
-import { updateLeadership } from "~/redux/features/leadershipSlice";
+import { IconUserEdit } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
+import LoadingSpinner from "~/components/route-components/Loading/loading-spinner";
+import { updateReport } from "~/redux/features/reportSlice";
 import { useAppDispatch, useAppSelector } from "~/redux/hooks/hook";
 
-const LeadershipPage = () => {
+const ReportUpdatePage = () => {
   const location = useLocation();
   const data = location.state || {}; // <-- received state
   const dispatch = useAppDispatch();
+  const [isAttempted, setIsAttempted] = useState<boolean>(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState(data?.imageUrl || "");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { loading } = useAppSelector((state) => state.leader);
+  const { loading, data: reportData } = useAppSelector((state) => state.report);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     id: data?.id || "",
-    name: data?.name || "",
-    designation: data?.designation || "",
-    email: data?.email || "",
-    phoneNumber: data?.phoneNumber || "",
+    title: data?.title || "",
+    description: data?.description || "",
+    icon: data?.icon || "",
+    categoryId: data?.categoryId || "",
+    pdfLink: data?.pdfLink || "",
     isActive: data?.isActive ?? true,
   });
+
+  useEffect(() => {
+    if (isAttempted) return;
+    const ShowToast = reportData?.success ? toast.success : toast.error;
+    ShowToast(reportData?.statusCode ?? reportData?.code, {
+      description: reportData?.message,
+      position: "top-right",
+      richColors: true,
+    });
+    if (reportData?.success) {
+      navigate(-1);
+    }
+  }, [reportData]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,16 +49,18 @@ const LeadershipPage = () => {
 
     // Append file if selected
     if (selectedFile) {
-      formPayload.append("imageUrl", selectedFile);
+      formPayload.append("pdfLink", selectedFile);
     }
 
     // Also append the original image URL if no new file is selected
-    if (!selectedFile && data.imageUrl) {
-      formPayload.append("imageUrl", data.imageUrl);
+    if (!selectedFile && data?.pdfLink) {
+      formPayload.append("pdfLink", data?.pdfLink);
     }
+
     // Handle form submission
-    dispatch(updateLeadership({ token: "", formPayload }));
-    navigate(-1);
+    dispatch(updateReport({ token: "", formPayload }));
+    // navigate(-1);
+    setIsAttempted(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,8 +68,6 @@ const LeadershipPage = () => {
     if (!file) return;
 
     setSelectedFile(file);
-    const url = URL.createObjectURL(file);
-    setPreview(url);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,10 +77,6 @@ const LeadershipPage = () => {
   const handleCancel = () => {
     // Navigate back or reset
     navigate(-1);
-  };
-
-  const handleFileButtonClick = () => {
-    fileInputRef.current?.click();
   };
 
   return (
@@ -83,130 +89,88 @@ const LeadershipPage = () => {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
-              Update Leader
+              Update Report
             </h2>
             <p className="text-sm text-gray-500">
-              Modify the leadership information
+              Modify the partner information
             </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-6">
-            {/* Image Upload Section */}
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative">
-                <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50">
-                  {preview ? (
-                    <img
-                      src={preview}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <IconUserEdit className="w-8 h-8" />
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleFileButtonClick}
-                  className="absolute -bottom-2 -right-2 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-                >
-                  <IconUpload className="w-4 h-4" />
-                </button>
-              </div>
-
-              <input
-                type="file"
-                name="imageUrl"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                className="hidden"
-              />
-
-              <p className="text-sm text-gray-500 text-center">
-                Click the camera icon to update photo
-              </p>
-            </div>
-
             {/* Form Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
-                  htmlFor="name"
+                  htmlFor="title"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Full Name *
+                  Title *
                 </label>
                 <input
-                  id="name"
-                  name="name"
+                  id="title"
+                  name="title"
                   type="text"
                   required
-                  value={formData.name}
+                  value={formData.title}
                   onChange={handleChange}
-                  placeholder="Enter full name"
+                  placeholder="Enter title"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="designation"
+                  htmlFor="description"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Designation *
+                  Description *
                 </label>
                 <input
-                  id="designation"
-                  name="designation"
+                  id="description"
+                  name="description"
                   type="text"
                   required
-                  value={formData.designation}
+                  value={formData.description}
                   onChange={handleChange}
-                  placeholder="e.g., CEO, Director"
+                  placeholder="Enter description"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="icon"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Email Address *
+                  Icon Text * (text must be from same group)
                 </label>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
+                  id="icon"
+                  name="icon"
+                  type="text"
                   required
-                  value={formData.email}
+                  value={formData.icon}
                   onChange={handleChange}
-                  placeholder="email@company.com"
+                  placeholder="BsFire"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="phoneNumber"
+                  htmlFor="pdfLink"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Phone Number *
+                  PDF Link *
                 </label>
                 <input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
+                  id="pdfLink"
+                  name="pdfLink"
+                  type="file"
                   required
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="+880XXXXXXXXXX"
+                  onChange={handleFileChange}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
@@ -226,7 +190,7 @@ const LeadershipPage = () => {
                 htmlFor="isActive"
                 className="text-sm font-medium text-gray-700"
               >
-                Active team member
+                Active Report
               </label>
             </div>
           </div>
@@ -245,7 +209,7 @@ const LeadershipPage = () => {
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
             >
-              Update Leader
+              {loading ? <LoadingSpinner /> : "Update Report"}
             </button>
           </div>
         </form>
@@ -254,4 +218,4 @@ const LeadershipPage = () => {
   );
 };
 
-export default LeadershipPage;
+export default ReportUpdatePage;
