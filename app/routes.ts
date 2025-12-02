@@ -15,6 +15,10 @@ export default [
         "profile-info",
         "routes/dashboard/company-info/company-information/company-info.tsx"
       ),
+      route(
+        "update",
+        "routes/dashboard/company-info/company-information/update-company-info.tsx"
+      ),
       route("branches", "routes/dashboard/company-info/branches/branches.tsx"),
       route(
         "bank-info",

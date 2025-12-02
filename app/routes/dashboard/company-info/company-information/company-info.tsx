@@ -1,19 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
-import {
-  FiEdit2,
-  FiSave,
-  FiX,
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiGlobe,
-  FiUsers,
-  FiTrendingUp,
-  FiTarget,
-  FiEye,
-} from "react-icons/fi";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { FiMail, FiPhone, FiMapPin, FiTarget, FiEye } from "react-icons/fi";
 import {
   FaFacebook,
   FaYoutube,
@@ -24,41 +11,29 @@ import {
 import { useAppDispatch, useAppSelector } from "~/redux/hooks/hook";
 import {
   getAllCompanyProfile,
-  updateCompanyProfile,
+  type CompanyProfile,
 } from "~/redux/features/companyInfoSlice";
 
 const CompanyProfile: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { data, loading, error, editingField } = useAppSelector(
-    (state) => state.company
-  );
-  const [editValues, setEditValues] = useState<Record<string, string>>({});
+  const navigate = useNavigate();
+  const { data, loading, error } = useAppSelector((state) => state.company);
+  const [tempToken] = React.useState(localStorage.getItem("token") || "");
 
   useEffect(() => {
-    dispatch(getAllCompanyProfile({ token: "" }));
-  }, [dispatch]);
+    dispatch(getAllCompanyProfile({ token: tempToken }));
+  }, [dispatch, tempToken]);
 
-  const handleEditClick = (field: string, value: string) => {
-    // dispatch(updateCompanyProfile({token:"",formPayload:field}));
-    setEditValues({ ...editValues, [field]: value });
+  const handleEditClick = () => {
+    navigate("/dashboard/company/update");
   };
 
-  const handleSaveClick = (field: string) => {
-    if (data && editValues[field] !== undefined) {
-      // dispatch(updateCompanyProfile({ [field]: editValues[field] }));
-    }
+  // Format number with commas
+  const formatNumber = (num: number) => {
+    return num?.toLocaleString() || "0";
   };
 
-  const handleCancelClick = () => {
-    // dispatch(setEditingField(null));
-    setEditValues({});
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setEditValues({ ...editValues, [field]: value });
-  };
-
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -76,116 +51,84 @@ const CompanyProfile: React.FC = () => {
     );
   }
 
-  if (!data) return null;
-
-  const renderEditableField = (
-    field: string,
-    value: string | number,
-    isTextarea: boolean = false,
-    rows: number = 3,
-    className: string = ""
-  ) => {
-    const isEditing = editingField === field;
-    const displayValue = isEditing ? editValues[field] || value : value;
-
+  if (!data?.result) {
     return (
-      <div className="relative group">
-        {isEditing ? (
-          <div className="flex flex-col space-y-2">
-            {isTextarea ? (
-              <textarea
-                value={displayValue}
-                onChange={(e) => handleInputChange(field, e.target.value)}
-                rows={rows}
-                className={`w-full p-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className}`}
-                autoFocus
-              />
-            ) : (
-              <input
-                type="text"
-                value={displayValue}
-                onChange={(e) => handleInputChange(field, e.target.value)}
-                className={`w-full p-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className}`}
-                autoFocus
-              />
-            )}
-            <div className="flex space-x-2 mt-2">
-              <button
-                onClick={() => handleSaveClick(field)}
-                className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <FiSave size={16} />
-                <span>Save</span>
-              </button>
-              <button
-                onClick={handleCancelClick}
-                className="flex items-center space-x-1 px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <FiX size={16} />
-                <span>Cancel</span>
-              </button>
-            </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="text-gray-500 text-lg mb-4">
+            No company profile data found.
           </div>
-        ) : (
-          <div className="relative">
-            <div className={className}>{displayValue}</div>
-            <button
-              onClick={() => handleEditClick(field, String(value))}
-              className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-blue-600 hover:text-blue-800"
-            >
-              <FiEdit2 size={18} />
-            </button>
-          </div>
-        )}
+          <button
+            onClick={() => navigate("update")}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Create Company Profile
+          </button>
+        </div>
       </div>
     );
-  };
+  }
+
+  const company = data?.result[0];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                {renderEditableField(
-                  "name",
-                  data?.result?.name,
-                  false,
-                  1,
-                  "text-4xl font-bold text-gray-900"
-                )}
+        {/* Header with Edit Button */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 space-y-4 sm:space-y-0">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Company Profile
+            </h1>
+            <p className="text-gray-600 mt-1 sm:mt-2">
+              View and manage your company information
+            </p>
+          </div>
+          <button
+            onClick={handleEditClick}
+            className="flex self-start sm:self-auto items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            <span>Edit Profile</span>
+          </button>
+        </div>
+
+        {/* Main Profile Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-6 lg:space-y-0">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                {company.name}
               </h1>
-              <p className="text-xl text-blue-600 font-semibold mb-4">
-                {renderEditableField(
-                  "quote",
-                  data?.result?.quote,
-                  false,
-                  1,
-                  "text-xl text-blue-600 font-semibold"
-                )}
+              <p className="text-md sm:text-lg lg:text-xl text-blue-600 font-semibold mb-4">
+                {company.quote}
               </p>
-              <p className="text-gray-600 mb-6">
-                {renderEditableField(
-                  "shortTitle",
-                  data?.result?.shortTitle,
-                  false,
-                  1,
-                  "text-lg text-gray-600"
-                )}
+              <p className="text-gray-600 mb-6 text-md sm:text-lg">
+                {company.shortTitle}
               </p>
             </div>
-            <div className="flex space-x-4">
-              <div className="bg-blue-100 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-blue-700">
-                  {data?.result?.numberOfEmployees}+
+            <div className="w-full lg:w-auto flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="bg-blue-100 rounded-lg p-4 text-center sm:min-w-[140px]">
+                <div className="text-2xl lg:text-3xl font-bold text-blue-700">
+                  {formatNumber(company.numberOfEmployees)}+
                 </div>
                 <div className="text-sm text-blue-600">Employees</div>
               </div>
-              <div className="bg-green-100 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-green-700">
-                  ${data?.result?.annualTurnover}M
+              <div className="bg-green-100 rounded-lg p-4 text-center sm:min-w-[140px]">
+                <div className="text-2xl lg:text-3xl font-bold text-green-700">
+                  ${company.annualTurnover}M
                 </div>
                 <div className="text-sm text-green-600">Annual Turnover</div>
               </div>
@@ -197,83 +140,83 @@ const CompanyProfile: React.FC = () => {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* About Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">
                 About Company
               </h2>
-              {renderEditableField(
-                "description",
-                data?.result?.description,
-                true,
-                6,
-                "text-gray-700 leading-relaxed"
-              )}
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {company.description}
+              </div>
             </div>
 
             {/* Mission & Vision */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-xl p-8">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-xl p-6 sm:p-8">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="p-3 bg-blue-600 rounded-lg">
                     <FiTarget className="text-white" size={24} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Mission</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                    Mission
+                  </h3>
                 </div>
-                {renderEditableField(
-                  "mission",
-                  data?.result?.mission,
-                  true,
-                  4,
-                  "text-gray-700 leading-relaxed"
-                )}
+                <div className="text-gray-700 leading-relaxed text-justify ">
+                  {company.mission}
+                </div>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-xl p-8">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-xl p-6 sm:p-8">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="p-3 bg-purple-600 rounded-lg">
                     <FiEye className="text-white" size={24} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Vision</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                    Vision
+                  </h3>
                 </div>
-                {renderEditableField(
-                  "vision",
-                  data?.result?.vision,
-                  true,
-                  4,
-                  "text-gray-700 leading-relaxed"
-                )}
+                <div className="text-gray-700 leading-relaxed text-justify">
+                  {company.vision}
+                </div>
               </div>
             </div>
 
             {/* Production Capacity */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
                 Production Capacity
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="bg-gray-50 p-6 rounded-xl text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {data?.result?.numberOfSewingPlants}
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="bg-gray-50 p-4 md:p-6 rounded-xl text-center flex flex-col justify-center">
+                  <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
+                    {company.numberOfSewingPlants}
                   </div>
-                  <div className="text-gray-600">Sewing Plants</div>
+                  <div className="text-gray-600 text-sm md:text-base">
+                    Sewing Plants
+                  </div>
                 </div>
-                <div className="bg-gray-50 p-6 rounded-xl text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">
-                    {data?.result?.numberOfSewingLines}
+                <div className="bg-gray-50 p-4 md:p-6 rounded-xl text-center flex flex-col justify-center">
+                  <div className="text-2xl md:text-3xl font-bold text-green-600 mb-2">
+                    {company.numberOfSewingLines}
                   </div>
-                  <div className="text-gray-600">Sewing Lines</div>
+                  <div className="text-gray-600 text-sm md:text-base">
+                    Sewing Lines
+                  </div>
                 </div>
-                <div className="bg-gray-50 p-6 rounded-xl text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">
-                    {data?.result?.productionCapacity}
+                <div className="bg-gray-50 p-4 md:p-6 rounded-xl text-center flex flex-col justify-center">
+                  <div className="text-xl sm:text-md md:text-3xl font-bold text-purple-600 mb-2">
+                    {formatNumber(company.productionCapacity)}
                   </div>
-                  <div className="text-gray-600">Monthly Production</div>
+                  <div className="text-gray-600 text-sm md:text-base">
+                    Monthly Production
+                  </div>
                 </div>
-                <div className="bg-gray-50 p-6 rounded-xl text-center">
-                  <div className="text-xl font-bold text-orange-600 mb-2">
-                    {data?.result?.primaryMarkets}
+                <div className="bg-gray-50 p-4 md:p-6 rounded-xl text-center flex flex-col justify-center">
+                  <div className="text-base sm:text-lg md:text-xl font-bold text-orange-600 mb-2 break-words">
+                    {company.primaryMarkets}
                   </div>
-                  <div className="text-gray-600">Primary Markets</div>
+                  <div className="text-gray-600 text-sm md:text-base">
+                    Primary Markets
+                  </div>
                 </div>
               </div>
             </div>
@@ -282,119 +225,126 @@ const CompanyProfile: React.FC = () => {
           {/* Right Column */}
           <div className="space-y-8">
             {/* Contact Information */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
                 Contact Information
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <FiMail className="text-blue-600 mt-1" size={20} />
-                  <div className="flex-1">
+                  <FiMail
+                    className="text-blue-600 mt-1 flex-shrink-0"
+                    size={20}
+                  />
+                  <div className="flex-1 min-w-0">
                     <div className="font-semibold text-gray-700">Email</div>
-                    {renderEditableField(
-                      "email",
-                      data?.result?.email,
-                      false,
-                      1,
-                      "text-gray-600 break-all"
-                    )}
+                    <div className="text-gray-600 break-all">
+                      {company.email}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <FiPhone className="text-blue-600 mt-1" size={20} />
-                  <div className="flex-1">
+                  <FiPhone
+                    className="text-blue-600 mt-1 flex-shrink-0"
+                    size={20}
+                  />
+                  <div className="flex-1 min-w-0">
                     <div className="font-semibold text-gray-700">Phone</div>
-                    {renderEditableField(
-                      "phoneNumber",
-                      data?.result?.phoneNumber,
-                      false,
-                      1,
-                      "text-gray-600"
-                    )}
+                    <div className="text-gray-600">{company.phoneNumber}</div>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <FiMapPin className="text-blue-600 mt-1" size={20} />
-                  <div className="flex-1">
+                  <FiMapPin
+                    className="text-blue-600 mt-1 flex-shrink-0"
+                    size={20}
+                  />
+                  <div className="flex-1 min-w-0">
                     <div className="font-semibold text-gray-700">Location</div>
-                    {renderEditableField(
-                      "location",
-                      data?.result?.location,
-                      true,
-                      3,
-                      "text-gray-600"
-                    )}
+                    <div className="text-gray-600 whitespace-pre-line">
+                      {company.location}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Social Links */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
                 Connect With Us
               </h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   {
                     icon: FaFacebook,
                     field: "facebookLink",
                     label: "Facebook",
                     color: "bg-blue-600",
+                    value: company.facebookLink,
                   },
                   {
                     icon: FaYoutube,
                     field: "youtubeLink",
                     label: "YouTube",
                     color: "bg-red-600",
+                    value: company.youtubeLink,
                   },
                   {
                     icon: FaLinkedin,
                     field: "linkedInLink",
                     label: "LinkedIn",
                     color: "bg-blue-700",
+                    value: company.linkedInLink,
                   },
                   {
                     icon: FaInstagram,
                     field: "instagramLink",
                     label: "Instagram",
                     color: "bg-pink-600",
+                    value: company.instagramLink,
                   },
                   {
                     icon: FaTwitter,
                     field: "twitterLink",
                     label: "Twitter",
                     color: "bg-sky-500",
+                    value: company.twitterLink,
                   },
                 ].map((social) => (
-                  <div key={social.field} className="relative group">
-                    <a
-                      href={""}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className={`${social.color} p-2 rounded-lg`}>
-                        <social.icon className="text-white" size={20} />
+                  <div key={social.field} className="relative">
+                    {social.value &&
+                    social.value !== "fb-link" &&
+                    social.value !== "youtube-link" ? (
+                      <a
+                        href={social.value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className={`${social.color} p-2 rounded-lg`}>
+                          <social.icon className="text-white" size={20} />
+                        </div>
+                        <span className="font-medium text-gray-700">
+                          {social.label}
+                        </span>
+                      </a>
+                    ) : (
+                      <div className="flex items-center space-x-3 p-3 rounded-lg opacity-75">
+                        <div className={`${social.color} p-2 rounded-lg`}>
+                          <social.icon className="text-white" size={20} />
+                        </div>
+                        <span className="font-medium text-gray-700">
+                          {social.label}
+                        </span>
                       </div>
-                      <span className="font-medium text-gray-700">
-                        {social.label}
-                      </span>
-                    </a>
-                    <button
-                      onClick={() => handleEditClick(social.field, "")}
-                      className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-blue-600 hover:text-blue-800"
-                    >
-                      <FiEdit2 size={16} />
-                    </button>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Maps */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
                 Our Locations
               </h2>
               <div className="space-y-6">
@@ -403,15 +353,21 @@ const CompanyProfile: React.FC = () => {
                     Factory Location
                   </h3>
                   <div className="relative rounded-lg overflow-hidden h-48">
-                    <iframe
-                      src={data?.result?.mapLink}
-                      className="absolute inset-0 w-full h-full"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Factory Location"
-                    />
+                    {company.mapLink ? (
+                      <iframe
+                        src={company.mapLink}
+                        className="absolute inset-0 w-full h-full"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Factory Location"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-500">No map available</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -419,15 +375,21 @@ const CompanyProfile: React.FC = () => {
                     Corporate Office
                   </h3>
                   <div className="relative rounded-lg overflow-hidden h-48">
-                    <iframe
-                      src={data?.result?.secondMapLink}
-                      className="absolute inset-0 w-full h-full"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Corporate Office"
-                    />
+                    {company.secondMapLink ? (
+                      <iframe
+                        src={company.secondMapLink}
+                        className="absolute inset-0 w-full h-full"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Corporate Office"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-500">No map available</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

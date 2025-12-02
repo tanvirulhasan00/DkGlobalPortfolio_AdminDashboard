@@ -4,7 +4,6 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import { baseUrl } from "~/components/route-components/data";
-
 import { apiRequest } from "~/redux/data/GetData";
 
 export type CompanyProfile = {
@@ -31,15 +30,15 @@ export type CompanyProfile = {
   numberOfSewingLines: number;
   productionCapacity: number;
   primaryMarkets: string;
-  profileImages: string | null;
 };
 
 interface Data {
   statusCode: number;
   success: boolean;
   message: string;
-  result: CompanyProfile;
+  result: CompanyProfile[];
 }
+
 interface StateType {
   loading: boolean;
   data: Data | null;
@@ -48,6 +47,7 @@ interface StateType {
   statusChange: boolean;
   editingField: string | null;
 }
+
 const initialState: StateType = {
   loading: false,
   data: null,
@@ -71,7 +71,7 @@ export const getAllCompanyProfile = createAsyncThunk(
       );
       return res;
     } catch (error: any) {
-      console.log(error);
+      console.log("Error fetching profile:", error);
       return rejectWithValue(
         error?.response?.data?.message || "Failed to get profile data"
       );
@@ -90,19 +90,20 @@ export const createCompanyProfile = createAsyncThunk(
         "post",
         `${baseUrl}/api/company-info/create`,
         token,
-        "application/json",
+        "multipart/form-data",
         {},
         formPayload
       );
       return res;
     } catch (error: any) {
-      console.log(error);
+      console.log("Error creating profile:", error);
       return rejectWithValue(
         error?.response?.data?.message || "Failed to create profile"
       );
     }
   }
 );
+
 export const updateCompanyProfile = createAsyncThunk(
   "profile/updateCompanyProfile",
   async (
@@ -114,13 +115,13 @@ export const updateCompanyProfile = createAsyncThunk(
         "put",
         `${baseUrl}/api/company-info/update`,
         token,
-        "multipart/form-data",
+        "application/json",
         {},
         formPayload
       );
       return res;
     } catch (error: any) {
-      console.log(error);
+      console.log("Error updating profile:", error);
       return rejectWithValue(
         error?.response?.data?.message || "Failed to update profile"
       );
@@ -129,15 +130,20 @@ export const updateCompanyProfile = createAsyncThunk(
 );
 
 const companyProfileSlice = createSlice({
-  name: "profile",
+  name: "company",
   initialState,
   reducers: {
     setEditingField: (state, action: PayloadAction<string | null>) => {
       state.editingField = action.payload;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
+    resetState: () => initialState,
   },
   extraReducers: (builder) => {
     builder
+      // Get all company profile
       .addCase(getAllCompanyProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -154,6 +160,7 @@ const companyProfileSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // Create company profile
       .addCase(createCompanyProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -169,8 +176,9 @@ const companyProfileSlice = createSlice({
       .addCase(createCompanyProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-        state.refresh = !state.refresh;
       })
+
+      // Update company profile
       .addCase(updateCompanyProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -180,16 +188,18 @@ const companyProfileSlice = createSlice({
         (state, action: PayloadAction<Data>) => {
           state.loading = false;
           state.data = action.payload;
+          state.editingField = null;
           state.refresh = !state.refresh;
         }
       )
       .addCase(updateCompanyProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-        state.refresh = !state.refresh;
+        state.editingField = null;
       });
   },
 });
 
-export const { setEditingField } = companyProfileSlice.actions;
+export const { setEditingField, clearError, resetState } =
+  companyProfileSlice.actions;
 export default companyProfileSlice.reducer;
