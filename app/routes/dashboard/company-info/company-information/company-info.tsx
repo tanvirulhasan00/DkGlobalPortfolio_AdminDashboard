@@ -203,7 +203,7 @@ const CompanyProfile: React.FC = () => {
                   </div>
                 </div>
                 <div className="bg-gray-50 p-4 md:p-6 rounded-xl text-center flex flex-col justify-center">
-                  <div className="text-xl sm:text-md md:text-3xl font-bold text-purple-600 mb-2">
+                  <div className="text-xl sm:text-md md:text-3xl lg:text-xl font-bold text-purple-600 mb-2 break-words">
                     {formatNumber(company.productionCapacity)}
                   </div>
                   <div className="text-gray-600 text-sm md:text-base">
