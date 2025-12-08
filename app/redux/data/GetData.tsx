@@ -12,6 +12,7 @@ export const apiRequest = async (
   params: Params = {},
   formData?: any
 ) => {
+  console.log("p", params);
   try {
     const { data } = await axios({
       method,

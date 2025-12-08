@@ -1,90 +1,21 @@
-import React, { type FormEvent, useState } from "react";
+import React, { type FormEvent, useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-interface ProductImage {
-  id: number;
-  title: string;
-  searchText: string | null;
-  imageUrl: string;
-  isActive: boolean;
-  productId: number;
-  product: null;
-}
-
-const imagesData: ProductImage[] = [
-  {
-    id: 1,
-    title: "Image-1",
-    searchText: "Upper",
-    imageUrl:
-      "https://portfolio.api.cookiesoftwareltd.com:4201/product-images/0d59bef4-ec5b-42bb-8903-2631503a1ef1.jpg",
-    isActive: true,
-    productId: 1,
-    product: null,
-  },
-  {
-    id: 2,
-    title: "Image-2",
-    searchText: "Upper",
-    imageUrl:
-      "https://portfolio.api.cookiesoftwareltd.com:4201/product-images/d891fda6-0c8a-4222-b872-fc13e5d594de.jpg",
-    isActive: true,
-    productId: 2,
-    product: null,
-  },
-  {
-    id: 3,
-    title: "Image-3",
-    searchText: "Lower",
-    imageUrl:
-      "https://portfolio.api.cookiesoftwareltd.com:4201/product-images/fb8ba6e7-1419-4eac-9394-2e7c83c6e44a.jpg",
-    isActive: true,
-    productId: 3,
-    product: null,
-  },
-  {
-    id: 4,
-    title: "Image-4",
-    searchText: "Lower",
-    imageUrl:
-      "https://portfolio.api.cookiesoftwareltd.com:4201/product-images/2b02d33c-8b44-4834-921f-96973c9f109a.jpg",
-    isActive: true,
-    productId: 4,
-    product: null,
-  },
-  {
-    id: 5,
-    title: "Image-5",
-    searchText: "Lower",
-    imageUrl:
-      "https://portfolio.api.cookiesoftwareltd.com:4201/product-images/a18eaa90-f92a-49b6-bc24-4e03bf1a2a80.jpg",
-    isActive: true,
-    productId: 5,
-    product: null,
-  },
-  {
-    id: 6,
-    title: "Image-6",
-    searchText: "Lower",
-    imageUrl:
-      "https://portfolio.api.cookiesoftwareltd.com:4201/product-images/541e25a9-0b50-49af-9210-bc3b37f90409.jpg",
-    isActive: true,
-    productId: 6,
-    product: null,
-  },
-  {
-    id: 7,
-    title: "test",
-    searchText: null,
-    imageUrl:
-      "https://localhost:7274/product-images/3f120766-c138-4fbb-ad49-d444bdc100f2.png",
-    isActive: true,
-    productId: 1,
-    product: null,
-  },
-];
+import {
+  getAllProductImages,
+  createProductImage,
+  updateProductImage,
+  deleteProductImage,
+  type ProductImage,
+} from "~/redux/features/productImageSlice";
+import { useAppDispatch, useAppSelector } from "~/redux/hooks/hook";
 
 const Images = () => {
-  const [images, setImages] = useState<ProductImage[]>(imagesData);
+  const dispatch = useAppDispatch();
+  const { data, loading, error, refresh } = useAppSelector(
+    (state) => state.productImage
+  );
+  const [images, setImages] = useState<ProductImage[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImage, setCurrentImage] =
     useState<Partial<ProductImage> | null>(null);
@@ -92,7 +23,7 @@ const Images = () => {
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
 
   const handleOpenModal = (image: ProductImage | null = null) => {
-    setCurrentImage(image ? { ...image } : {});
+    setCurrentImage(image ? { ...image } : { productId: 0 }); // Ensure productId is present
     setIsModalOpen(true);
   };
 
@@ -113,52 +44,52 @@ const Images = () => {
 
   const confirmDelete = () => {
     if (imageToDelete !== null) {
-      setImages(images.filter((image) => image.id !== imageToDelete));
+      dispatch(deleteProductImage({ token: "", id: Number(imageToDelete) }));
       handleCloseDeleteModal();
     }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const title = formData.get("title") as string;
-    const searchText = formData.get("searchText") as string;
-    const imageFile = formData.get("imageFile") as File;
-
-    const newImageData = {
-      title,
-      searchText,
-      imageUrl: currentImage?.imageUrl || "",
-      isActive: true,
-      productId: currentImage?.productId || Date.now(), // Use existing or new
-      product: null,
-    };
-
-    if (imageFile && imageFile.size > 0) {
-      newImageData.imageUrl = URL.createObjectURL(imageFile);
-    }
+    const form = e.currentTarget;
+    const formPayload = new FormData(form);
 
     if (currentImage?.id) {
       // Update
-      setImages(
-        images.map((img) =>
-          img.id === currentImage.id
-            ? { ...img, ...newImageData, id: img.id }
-            : img
-        )
-      );
+      formPayload.append("id", String(currentImage.id));
+      formPayload.append("ownerId", String(currentImage.productId));
+      dispatch(updateProductImage({ token: "", formPayload }));
     } else {
       // Create
-      const newImage: ProductImage = {
-        ...newImageData,
-        id: Date.now(), // Simple unique ID generation
-      };
-      setImages([newImage, ...images]);
+      // You might need to add a productId selector here if it's not part of the form
+      // For now, assuming it's handled or not needed for creation
+      dispatch(createProductImage({ token: "", formPayload }));
     }
 
     handleCloseModal();
   };
 
+  useEffect(() => {
+    dispatch(getAllProductImages({ token: "" }));
+  }, [dispatch, refresh]);
+
+  useEffect(() => {
+    if (data && Array.isArray(data.result)) {
+      setImages(data.result);
+    }
+  }, [data]);
+
+  if (loading && images.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Loading images...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center p-4">Error: {error}</div>;
+  }
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -233,7 +164,7 @@ const Images = () => {
             <h2 className="text-xl font-bold mb-4">
               {currentImage?.id ? "Edit Image" : "Add New Image"}
             </h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} encType="multipart/form-data">
               <div className="mb-4">
                 <label
                   htmlFor="title"
@@ -267,15 +198,31 @@ const Images = () => {
               </div>
               <div className="mb-4">
                 <label
-                  htmlFor="imageFile"
+                  htmlFor="ownerId"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Product ID
+                </label>
+                <input
+                  type="text"
+                  name="ownerId"
+                  id="ownerId"
+                  defaultValue={currentImage?.productId || ""}
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="imageUrl"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Image File
                 </label>
                 <input
                   type="file"
-                  name="imageFile"
-                  id="imageFile"
+                  name="imageUrl"
+                  id="imageUrl"
                   accept="image/*"
                   className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
