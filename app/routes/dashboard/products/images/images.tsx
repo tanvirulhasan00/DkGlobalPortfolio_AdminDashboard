@@ -110,7 +110,7 @@ const Images = () => {
             <img
               src={image.imageUrl}
               alt={image.title}
-              className="w-full h-48 object-cover"
+              className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
             />
             <div className="p-4 bg-white">
               <h2 className="text-lg font-semibold">{image.title}</h2>

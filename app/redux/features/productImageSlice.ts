@@ -73,6 +73,7 @@ export const createProductImage = createAsyncThunk(
         {},
         formPayload
       );
+      console.log("create", res);
       return res;
     } catch (error: any) {
       return rejectWithValue(
@@ -91,7 +92,7 @@ export const updateProductImage = createAsyncThunk(
     try {
       const res = await apiRequest(
         "put",
-        `${baseUrl}/api/product-images/update-by-productid`,
+        `${baseUrl}/api/product-images/update`,
         token,
         "multipart/form-data",
         {},
@@ -117,11 +118,10 @@ export const deleteProductImage = createAsyncThunk(
     try {
       const res = await apiRequest(
         "delete",
-        // `${baseUrl}/api/product-images/delete`,
-        `https://localhost:7274/api/product-images/delete?id=${id}`,
+        `${baseUrl}/api/product-images/delete`,
         token,
         "application/json",
-        {},
+        { id },
         null
       );
       console.log("delete", res);

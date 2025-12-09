@@ -17,13 +17,13 @@ export const apiRequest = async (
     const { data } = await axios({
       method,
       url,
-      params: method === "get" ? params : undefined, // ✅ only for GET
+      params, // ✅ only for GET
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "text/plain",
         "Content-Type": contentType,
       },
-      data: method !== "get" ? formData || params : undefined, // ✅ only for POST/DELETE
+      data: formData, // ✅ only for POST/DELETE
     });
     return data;
   } catch (error: any) {
