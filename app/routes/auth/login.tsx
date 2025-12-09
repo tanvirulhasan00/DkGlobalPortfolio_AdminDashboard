@@ -28,7 +28,7 @@ const LoginPage = () => {
   useEffect(() => {
     if (!attemptedLogin || !data) return;
     const showToast = data.success ? toast.success : toast.error;
-    showToast(data.statusCode ?? data?.code, {
+    showToast(data.statusCode, {
       description: data.message,
       position: "top-right",
       richColors: true,
