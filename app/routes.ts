@@ -37,6 +37,8 @@ export default [
         "categories",
         "routes/dashboard/products/categories/categories.tsx"
       ),
+      route("add", "routes/dashboard/products/products/product-create.tsx"),
+      route("update", "routes/dashboard/products/products/products-update.tsx"),
       route("images", "routes/dashboard/products/images/images.tsx"),
     ]),
     ...prefix("blogs", [
