@@ -15,16 +15,32 @@ export type Product = {
   isActive: boolean;
 };
 
+export type ProductCategory = {
+  id: number;
+  name: string;
+  description: string;
+  link: string;
+  icon: string;
+  isActive: boolean;
+};
+
 interface ApiResponse {
   statusCode: number;
   success: boolean;
   message: string;
   result: Product[]; // Can be an array or single object
 }
+interface ApiResponseForCat {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  result: ProductCategory[]; // Can be an array or single object
+}
 
 interface StateType {
   loading: boolean;
   data: ApiResponse | null;
+  categoryData: ApiResponseForCat | null;
   error: string | null;
   refresh: boolean;
 }
@@ -32,6 +48,7 @@ interface StateType {
 const initialState: StateType = {
   loading: false,
   data: null,
+  categoryData: null,
   error: null,
   refresh: false,
 };
@@ -133,13 +150,111 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+// product category
+export const getAllProductCat = createAsyncThunk(
+  "productCat/getAllProductCat",
+  async ({ token }: { token: string | null }, { rejectWithValue }) => {
+    try {
+      const res = await apiRequest(
+        "get",
+        `${baseUrl}/api/products/category/getall`,
+        token,
+        "application/json",
+        {},
+        null
+      );
+      return res;
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to get product data"
+      );
+    }
+  }
+);
+
+export const createProductCat = createAsyncThunk(
+  "productCat/createProductCat",
+  async (
+    { token, formPayload }: { token: string | null; formPayload: FormData },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await apiRequest(
+        "post",
+        `${baseUrl}/api/products/category/create`,
+        token,
+        "application/json",
+        {},
+        formPayload
+      );
+      console.log("p create", res);
+      return res;
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to create product"
+      );
+    }
+  }
+);
+
+export const updateProductCat = createAsyncThunk(
+  "productCat/updateProductCat",
+  async (
+    { token, formPayload }: { token: string | null; formPayload: FormData },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await apiRequest(
+        "put",
+        `${baseUrl}/api/products/category/update`,
+        token,
+        "application/json",
+        {},
+        formPayload
+      );
+      console.log("p update", res);
+      return res;
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to update product"
+      );
+    }
+  }
+);
+
+export const deleteProductCat = createAsyncThunk(
+  "productCat/deleteProductCat",
+  async (
+    { token, id }: { token: string | null; id: number },
+    { rejectWithValue }
+  ) => {
+    console.log(typeof id, id);
+    try {
+      const res = await apiRequest(
+        "delete",
+        `${baseUrl}/api/products/category/delete`,
+        token,
+        "application/json",
+        { id },
+        null
+      );
+      console.log("delete", res);
+      return res;
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to delete product"
+      );
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "productImage",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Get All
+      // Get All product
       .addCase(getAllProduct.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -191,6 +306,61 @@ const productSlice = createSlice({
         state.refresh = !state.refresh;
       })
       .addCase(deleteProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Get All product category
+      .addCase(getAllProductCat.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        getAllProductCat.fulfilled,
+        (state, action: PayloadAction<ApiResponseForCat>) => {
+          state.loading = false;
+          state.categoryData = action.payload;
+        }
+      )
+      .addCase(getAllProductCat.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Create
+      .addCase(createProductCat.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createProductCat.fulfilled, (state) => {
+        state.loading = false;
+        state.refresh = !state.refresh;
+      })
+      .addCase(createProductCat.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Update
+      .addCase(updateProductCat.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProductCat.fulfilled, (state) => {
+        state.loading = false;
+        state.refresh = !state.refresh;
+      })
+      .addCase(updateProductCat.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Delete
+      .addCase(deleteProductCat.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProductCat.fulfilled, (state) => {
+        state.loading = false;
+        state.refresh = !state.refresh;
+      })
+      .addCase(deleteProductCat.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
