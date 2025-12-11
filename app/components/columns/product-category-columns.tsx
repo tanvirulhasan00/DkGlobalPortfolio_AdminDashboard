@@ -15,7 +15,7 @@ import { Button } from "~/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 
 import {
-  deleteProduct,
+  deleteProductCat,
   type ProductCategory,
 } from "~/redux/features/productSlice";
 import { Link } from "react-router";
@@ -25,7 +25,7 @@ const ProductActionsCell = ({ product }: { product: ProductCategory }) => {
   const dispatch = useAppDispatch();
 
   const handleDelete = () => {
-    dispatch(deleteProduct({ token: null, id: product.id }));
+    dispatch(deleteProductCat({ token: null, id: product.id }));
   };
 
   return (
@@ -36,7 +36,7 @@ const ProductActionsCell = ({ product }: { product: ProductCategory }) => {
         size="sm"
         className="transition-transform duration-300 hover:scale-110"
       >
-        <Link to={`update`} state={{ product }}>
+        <Link to={`update`} state={product}>
           Update
         </Link>
       </Button>
@@ -55,7 +55,7 @@ const ProductActionsCell = ({ product }: { product: ProductCategory }) => {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete this
-              product and remove the data from our servers.
+              product category and remove the data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

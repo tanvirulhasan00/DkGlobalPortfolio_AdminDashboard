@@ -33,10 +33,11 @@ export default [
     ]),
     ...prefix("products", [
       route("", "routes/dashboard/products/products/product.tsx"),
-      route(
-        "categories",
-        "routes/dashboard/products/categories/categories.tsx"
-      ),
+      ...prefix("categories", [
+        route("", "routes/dashboard/products/categories/categories.tsx"),
+        route("add", "routes/dashboard/products/categories/category-create.tsx"),
+        route("update", "routes/dashboard/products/categories/category-update.tsx"),
+      ]),
       route("add", "routes/dashboard/products/products/product-create.tsx"),
       route("update", "routes/dashboard/products/products/products-update.tsx"),
       route("images", "routes/dashboard/products/images/images.tsx"),
