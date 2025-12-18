@@ -6,8 +6,6 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import { getToken } from "~/components/route-components/getLocalStorage";
 import { LoginRequest, type LoginReq } from "~/redux/features/authSlice";
-import LoadingSpinner from "~/components/route-components/Loading/loading-spinner";
-import { LoadingTyping } from "~/components/route-components/Loading/loading-typing";
 
 const LoginPage = () => {
   const dispatch = useAppDispatch();
@@ -15,7 +13,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const token = getToken();
   const [attemptedLogin, setAttemptedLogin] = useState(false);
-  const [tokenLoading, setTokenLoading] = useState(true);
 
   // ✅ Redirect if already logged in
   useEffect(() => {
