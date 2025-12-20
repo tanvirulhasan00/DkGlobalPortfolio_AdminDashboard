@@ -63,6 +63,56 @@ export const getAllAuthors = createAsyncThunk(
   }
 );
 
+export const createAuthor = createAsyncThunk(
+  "blog/createAuthor",
+  async (
+    { token, formPayload }: { token: string | null; formPayload: FormData },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await apiRequest(
+        "post",
+        `${baseUrl}/api/blogs/author/create`,
+        token,
+        "multipart/form-data",
+        {},
+        formPayload
+      );
+      return res;
+    } catch (error: any) {
+      console.log(error);
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to create author"
+      );
+    }
+  }
+);
+
+export const updateAuthor = createAsyncThunk(
+  "blog/updateAuthor",
+  async (
+    { token, formPayload }: { token: string | null; formPayload: FormData },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await apiRequest(
+        "put",
+        `${baseUrl}/api/blogs/author/update`,
+        token,
+        "multipart/form-data",
+        {},
+        formPayload
+      );
+      return res;
+    } catch (error: any) {
+      console.log(error);
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to update author"
+      );
+    }
+  }
+);
+
 const blogSlice = createSlice({
   name: "blog",
   initialState,
@@ -83,6 +133,34 @@ const blogSlice = createSlice({
       .addCase(getAllAuthors.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(createAuthor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createAuthor.fulfilled, (state, action: PayloadAction<Data>) => {
+        state.loading = false;
+        state.data = action.payload;
+        state.refresh = !state.refresh;
+      })
+      .addCase(createAuthor.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        state.refresh = !state.refresh;
+      })
+      .addCase(updateAuthor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateAuthor.fulfilled, (state, action: PayloadAction<Data>) => {
+        state.loading = false;
+        state.data = action.payload;
+        state.refresh = !state.refresh;
+      })
+      .addCase(updateAuthor.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        state.refresh = !state.refresh;
       });
   },
 });

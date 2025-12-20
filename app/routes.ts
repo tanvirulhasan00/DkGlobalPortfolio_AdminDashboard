@@ -43,7 +43,11 @@ export default [
       route("images", "routes/dashboard/products/images/images.tsx"),
     ]),
     ...prefix("blogs", [
-      route("authors", "routes/dashboard/blogs/authors/authors.tsx"),
+      ...prefix("authors", [
+        route("", "routes/dashboard/blogs/authors/authors.tsx"),
+        route("add", "routes/dashboard/blogs/authors/author-create.tsx"),
+        route("update", "routes/dashboard/blogs/authors/author-update.tsx"),
+      ]),
       route("posts", "routes/dashboard/blogs/posts/posts.tsx"),
       route("categories", "routes/dashboard/blogs/categories/categories.tsx"),
       route("tags", "routes/dashboard/blogs/tags/tags.tsx"),
