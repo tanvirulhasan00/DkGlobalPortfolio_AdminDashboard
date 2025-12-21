@@ -49,7 +49,11 @@ export default [
         route("update", "routes/dashboard/blogs/authors/author-update.tsx"),
       ]),
       route("posts", "routes/dashboard/blogs/posts/posts.tsx"),
-      route("categories", "routes/dashboard/blogs/categories/categories.tsx"),
+      ...prefix("categories", [
+        route("", "routes/dashboard/blogs/categories/categories.tsx"),
+        route("add", "routes/dashboard/blogs/categories/category-create.tsx"),
+        route("update", "routes/dashboard/blogs/categories/category-update.tsx"),
+      ]),
       route("tags", "routes/dashboard/blogs/tags/tags.tsx"),
       route(
         "blog-post-tags",

@@ -1,0 +1,22 @@
+Implementation of Blog Categories complete.
+
+Summary of changes:
+1.  **Redux (`app/redux/features/blogSlice.ts`):**
+    *   Added `Category` and `CategoryData` types.
+    *   Added `getAllCategories`, `createCategory`, `updateCategory` async thunks.
+    *   Updated `initialState` to include `categoryData` and `refresh` logic.
+    *   Added reducers to handle the new thunks.
+
+2.  **Components:**
+    *   Created `app/components/columns/blog-category-columns.tsx` for the data table structure.
+
+3.  **Routes & Pages:**
+    *   Updated `app/routes/dashboard/blogs/categories/categories.tsx` to list categories using `DataTable`.
+    *   Created `app/routes/dashboard/blogs/categories/category-create.tsx` for adding new categories.
+    *   Created `app/routes/dashboard/blogs/categories/category-update.tsx` for updating existing categories.
+    *   Registered new routes in `app/routes.ts` under `/dashboard/blogs/categories/add` and `/dashboard/blogs/categories/update`.
+
+4.  **Fixes:**
+    *   Ensured correct usage of `getToken()` for authentication.
+    *   Aligned API request payloads (JSON) with backend expectations.
+    *   Prevented state overwrites in Redux to ensure data consistency.
